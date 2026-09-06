@@ -468,8 +468,27 @@ export interface MovieTrailer {
  * Fetch official trailer video for a movie from TMDB
  */
 export async function getMovieTrailer(tmdbId: number | string): Promise<MovieTrailer | null> {
-  const numericId = typeof tmdbId === 'string' ? parseInt(tmdbId.replace('tmdb-', ''), 10) : tmdbId;
-  if (isNaN(numericId) || !TMDB_API_KEY) return null;
+  if (!TMDB_API_KEY) return null;
+  let numericId = typeof tmdbId === 'string' ? parseInt(tmdbId.replace('tmdb-', ''), 10) : tmdbId;
+
+  if (isNaN(numericId) || !numericId) {
+    try {
+      const cleanQuery = String(tmdbId).replace(/^tmdb-/, '').replace(/-/g, ' ');
+      const searchRes = await fetch(
+        `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanQuery)}&page=1`
+      );
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        if (searchData.results && searchData.results[0]) {
+          numericId = searchData.results[0].id;
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  if (isNaN(numericId) || !numericId) return null;
 
   try {
     const res = await fetch(

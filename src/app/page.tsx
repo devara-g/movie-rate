@@ -309,11 +309,13 @@ export default function Home() {
     });
     try {
       const tmdbId = filmId.replace('tmdb-', '');
-      const res = await fetch(`/api/movies?type=trailer&id=${tmdbId}`);
+      const queryId = tmdbId || filmTitle;
+      const res = await fetch(`/api/movies?type=trailer&id=${encodeURIComponent(queryId)}`);
       const data = await res.json();
+      const videoKey = data?.key || data?.youtubeKey || null;
       setTrailerModal((prev) => ({
         ...prev,
-        youtubeKey: data.youtubeKey || null,
+        youtubeKey: videoKey,
         isLoading: false,
       }));
     } catch (err) {
