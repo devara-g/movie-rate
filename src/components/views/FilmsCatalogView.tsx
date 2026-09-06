@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FILMS, Film } from '@/data/cinemaData';
 import { prefetchMovieCard } from '@/lib/prefetch';
 
@@ -44,6 +44,86 @@ export const FilmsCatalogView: React.FC<FilmsCatalogViewProps> = ({
   const [sortBy, setSortBy] = useState<'rating' | 'popular' | 'year' | 'logs' | 'title'>('rating');
   const [viewMode, setViewMode] = useState<'grid' | 'wall' | 'list'>('grid');
   const [watchlist, setWatchlist] = useState<Record<string, boolean>>({});
+
+  // View Mode Liquid Glass Pill
+  const [hoveredViewMode, setHoveredViewMode] = useState<string | null>(null);
+  const [viewModePillStyle, setViewModePillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isViewModePillReady, setIsViewModePillReady] = useState(false);
+  const viewModeTrackRef = useRef<HTMLDivElement | null>(null);
+  const viewModeTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const currentViewModeTarget = hoveredViewMode || viewMode;
+
+  useEffect(() => {
+    const updateViewModePill = () => {
+      const targetBtn = viewModeTabRefs.current[currentViewModeTarget];
+      const track = viewModeTrackRef.current;
+      if (targetBtn && track) {
+        setViewModePillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsViewModePillReady(true);
+      }
+    };
+
+    updateViewModePill();
+    const timer = setTimeout(updateViewModePill, 40);
+    window.addEventListener('resize', updateViewModePill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateViewModePill);
+    };
+  }, [currentViewModeTarget, viewMode]);
+
+  // Decades Filter Liquid Glass Pill
+  const [hoveredDecade, setHoveredDecade] = useState<string | null>(null);
+  const [decadePillStyle, setDecadePillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isDecadePillReady, setIsDecadePillReady] = useState(false);
+  const decadeTrackRef = useRef<HTMLDivElement | null>(null);
+  const decadeTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const currentDecadeTarget = hoveredDecade || selectedDecade;
+
+  useEffect(() => {
+    const updateDecadePill = () => {
+      const targetBtn = decadeTabRefs.current[currentDecadeTarget];
+      const track = decadeTrackRef.current;
+      if (targetBtn && track) {
+        setDecadePillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsDecadePillReady(true);
+      }
+    };
+
+    updateDecadePill();
+    const timer = setTimeout(updateDecadePill, 40);
+    window.addEventListener('resize', updateDecadePill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateDecadePill);
+    };
+  }, [currentDecadeTarget, selectedDecade]);
 
   const genres = [
     'all',
@@ -130,17 +210,31 @@ export const FilmsCatalogView: React.FC<FilmsCatalogViewProps> = ({
           </p>
         </div>
 
-        {/* View Mode Switcher */}
+        {/* View Mode Switcher with Moving Liquid Glass */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: '#1b2228',
-            padding: '3px',
-            borderRadius: '4px',
-            border: '1px solid #2c3642',
-          }}
+          ref={viewModeTrackRef}
+          onMouseLeave={() => setHoveredViewMode(null)}
+          className="liquid-glass-nav-track"
+          style={{ padding: '3px' }}
         >
+          {/* Sliding Liquid Glass Pill */}
+          <div
+            className="liquid-glass-pill"
+            style={{
+              left: `${viewModePillStyle.left}px`,
+              top: `${viewModePillStyle.top}px`,
+              width: `${viewModePillStyle.width}px`,
+              height: `${viewModePillStyle.height}px`,
+              opacity: viewModePillStyle.opacity,
+              transition: isViewModePillReady
+                ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                : 'none',
+            }}
+          >
+            <div className="liquid-glass-reflection" />
+            <div className="liquid-glass-laser" />
+          </div>
+
           {(
             [
               { id: 'grid', label: 'Grid Tiket' },
@@ -150,18 +244,11 @@ export const FilmsCatalogView: React.FC<FilmsCatalogViewProps> = ({
           ).map((m) => (
             <button
               key={m.id}
+              ref={(el) => { viewModeTabRefs.current[m.id] = el; }}
               onClick={() => setViewMode(m.id as any)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '3px',
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                color: viewMode === m.id ? '#ffffff' : '#8899a6',
-                backgroundColor: viewMode === m.id ? '#2c3642' : 'transparent',
-                transition: 'all 0.15s ease',
-              }}
+              onMouseEnter={() => setHoveredViewMode(m.id)}
+              className={`liquid-glass-tab-btn ${viewMode === m.id ? 'active' : ''}`}
+              style={{ fontSize: '11px', padding: '6px 14px' }}
             >
               {m.label}
             </button>
@@ -183,17 +270,42 @@ export const FilmsCatalogView: React.FC<FilmsCatalogViewProps> = ({
           borderRadius: '6px',
         }}
       >
-        {/* Decades pills */}
-        <div className="hide-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto' }}>
+        {/* Decades pills with Moving Liquid Glass */}
+        <div
+          ref={decadeTrackRef}
+          onMouseLeave={() => setHoveredDecade(null)}
+          className="liquid-glass-nav-track hide-scrollbar"
+          style={{ overflowX: 'auto', padding: '3px 4px' }}
+        >
+          {/* Sliding Liquid Glass Pill */}
+          <div
+            className="liquid-glass-pill"
+            style={{
+              left: `${decadePillStyle.left}px`,
+              top: `${decadePillStyle.top}px`,
+              width: `${decadePillStyle.width}px`,
+              height: `${decadePillStyle.height}px`,
+              opacity: decadePillStyle.opacity,
+              transition: isDecadePillReady
+                ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                : 'none',
+            }}
+          >
+            <div className="liquid-glass-reflection" />
+            <div className="liquid-glass-laser" />
+          </div>
+
           {decades.map((d) => (
             <button
               key={d.id}
+              ref={(el) => { decadeTabRefs.current[d.id] = el; }}
               onClick={() => {
                 setSelectedDecade(d.id);
                 setCurrentPage(1);
               }}
-              className={`filter-chip ${selectedDecade === d.id ? 'active' : ''}`}
-              style={{ fontSize: '11px', padding: '5px 12px' }}
+              onMouseEnter={() => setHoveredDecade(d.id)}
+              className={`liquid-glass-tab-btn ${selectedDecade === d.id ? 'active' : ''}`}
+              style={{ fontSize: '11px', padding: '5px 12px', whiteSpace: 'nowrap' }}
             >
               {d.label}
             </button>

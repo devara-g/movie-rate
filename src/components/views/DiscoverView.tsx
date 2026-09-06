@@ -41,9 +41,127 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
   const [activeMood, setActiveMood] = useState('all');
   const [activeFormat, setActiveFormat] = useState('all');
   const [cinemaTab, setCinemaTab] = useState<'showing' | 'upcoming' | 'curated'>('showing');
+  const [hoveredCinemaTab, setHoveredCinemaTab] = useState<string | null>(null);
+  const [segmentedPillStyle, setSegmentedPillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isSegmentedPillReady, setIsSegmentedPillReady] = useState(false);
+  const segmentedNavRef = useRef<HTMLDivElement | null>(null);
+  const segmentedTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const [watchlist, setWatchlist] = useState<Record<string, boolean>>({});
   const [isHeroHovered, setIsHeroHovered] = useState<boolean>(false);
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+
+  const currentSegmentedTarget = hoveredCinemaTab || cinemaTab;
+
+  useEffect(() => {
+    const updateSegmentedPill = () => {
+      const targetBtn = segmentedTabRefs.current[currentSegmentedTarget];
+      const container = segmentedNavRef.current;
+      if (targetBtn && container) {
+        setSegmentedPillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsSegmentedPillReady(true);
+      }
+    };
+
+    updateSegmentedPill();
+    const timer = setTimeout(updateSegmentedPill, 40);
+    window.addEventListener('resize', updateSegmentedPill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateSegmentedPill);
+    };
+  }, [currentSegmentedTarget, cinemaTab]);
+
+  // Format Filter Liquid Glass Pill
+  const [hoveredFormat, setHoveredFormat] = useState<string | null>(null);
+  const [formatPillStyle, setFormatPillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isFormatPillReady, setIsFormatPillReady] = useState(false);
+  const formatTrackRef = useRef<HTMLDivElement | null>(null);
+  const formatTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const currentFormatTarget = hoveredFormat || activeFormat;
+
+  useEffect(() => {
+    const updateFormatPill = () => {
+      const targetBtn = formatTabRefs.current[currentFormatTarget];
+      const track = formatTrackRef.current;
+      if (targetBtn && track) {
+        setFormatPillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsFormatPillReady(true);
+      }
+    };
+
+    updateFormatPill();
+    const timer = setTimeout(updateFormatPill, 40);
+    window.addEventListener('resize', updateFormatPill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateFormatPill);
+    };
+  }, [currentFormatTarget, activeFormat]);
+
+  // Mood Filter Liquid Glass Pill
+  const [hoveredMood, setHoveredMood] = useState<string | null>(null);
+  const [moodPillStyle, setMoodPillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isMoodPillReady, setIsMoodPillReady] = useState(false);
+  const moodTrackRef = useRef<HTMLDivElement | null>(null);
+  const moodTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const currentMoodTarget = hoveredMood || activeMood;
+
+  useEffect(() => {
+    const updateMoodPill = () => {
+      const targetBtn = moodTabRefs.current[currentMoodTarget];
+      const track = moodTrackRef.current;
+      if (targetBtn && track) {
+        setMoodPillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsMoodPillReady(true);
+      }
+    };
+
+    updateMoodPill();
+    const timer = setTimeout(updateMoodPill, 40);
+    window.addEventListener('resize', updateMoodPill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateMoodPill);
+    };
+  }, [currentMoodTarget, activeMood]);
 
   // 1. Immediately hydrate from localStorage cache on client mount
   useEffect(() => {
@@ -258,11 +376,11 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
                       <span>Spotlight of the Week</span>
                     </div>
 
-                    <span className="badge-pill" style={{ fontSize: '10px', color: '#cbd5e1' }}>
+                    <span className="badge-pill">
                       {currentHeroFilm.filmStock.includes('35mm') ? '35MM CELLULOID' : currentHeroFilm.filmStock.includes('IMAX') ? 'IMAX 70MM' : 'DOLBY ATMOS'}
                     </span>
 
-                    <span className="badge-pill" style={{ fontSize: '10px', color: '#94a3b8' }}>
+                    <span className="badge-pill">
                       13+
                     </span>
 
@@ -634,37 +752,91 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
             gap: '14px',
           }}
         >
-          {/* Segmented Tab Controller */}
-          <div className="segmented-nav-container">
+          {/* Segmented Tab Controller with Moving Liquid Glass */}
+          <div
+            ref={segmentedNavRef}
+            onMouseLeave={() => setHoveredCinemaTab(null)}
+            className="segmented-nav-container"
+          >
+            {/* Moving Liquid Glass Pill */}
+            <div
+              className="liquid-glass-pill"
+              style={{
+                left: `${segmentedPillStyle.left}px`,
+                top: `${segmentedPillStyle.top}px`,
+                width: `${segmentedPillStyle.width}px`,
+                height: `${segmentedPillStyle.height}px`,
+                opacity: segmentedPillStyle.opacity,
+                transition: isSegmentedPillReady
+                  ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                  : 'none',
+              }}
+            >
+              <div className="liquid-glass-reflection" />
+              <div className="liquid-glass-laser" />
+            </div>
+
             <button
+              ref={(el) => { segmentedTabRefs.current['showing'] = el; }}
               onClick={() => setCinemaTab('showing')}
+              onMouseEnter={() => setHoveredCinemaTab('showing')}
               className={`segmented-nav-btn ${cinemaTab === 'showing' ? 'active' : ''}`}
             >
               Sedang Tayang
             </button>
 
             <button
+              ref={(el) => { segmentedTabRefs.current['upcoming'] = el; }}
               onClick={() => setCinemaTab('upcoming')}
+              onMouseEnter={() => setHoveredCinemaTab('upcoming')}
               className={`segmented-nav-btn ${cinemaTab === 'upcoming' ? 'active' : ''}`}
             >
               Akan Datang
             </button>
 
             <button
+              ref={(el) => { segmentedTabRefs.current['curated'] = el; }}
               onClick={() => setCinemaTab('curated')}
+              onMouseEnter={() => setHoveredCinemaTab('curated')}
               className={`segmented-nav-btn ${cinemaTab === 'curated' ? 'active' : ''}`}
             >
               Pilihan Editor
             </button>
           </div>
 
-          {/* Quick Format Filter Strip */}
-          <div className="hide-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto' }}>
+          {/* Quick Format Filter Strip with Moving Liquid Glass */}
+          <div
+            ref={formatTrackRef}
+            onMouseLeave={() => setHoveredFormat(null)}
+            className="liquid-glass-nav-track hide-scrollbar"
+            style={{ overflowX: 'auto', padding: '3px 4px' }}
+          >
+            {/* Sliding Liquid Glass Pill */}
+            <div
+              className="liquid-glass-pill"
+              style={{
+                left: `${formatPillStyle.left}px`,
+                top: `${formatPillStyle.top}px`,
+                width: `${formatPillStyle.width}px`,
+                height: `${formatPillStyle.height}px`,
+                opacity: formatPillStyle.opacity,
+                transition: isFormatPillReady
+                  ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                  : 'none',
+              }}
+            >
+              <div className="liquid-glass-reflection" />
+              <div className="liquid-glass-laser" />
+            </div>
+
             {FORMAT_FILTERS.map((fmt) => (
               <button
                 key={fmt.id}
+                ref={(el) => { formatTabRefs.current[fmt.id] = el; }}
                 onClick={() => setActiveFormat(fmt.id)}
-                className={`tag-pill ${activeFormat === fmt.id ? 'active' : ''}`}
+                onMouseEnter={() => setHoveredFormat(fmt.id)}
+                className={`liquid-glass-tab-btn ${activeFormat === fmt.id ? 'active' : ''}`}
+                style={{ fontSize: '11px', padding: '5px 12px', whiteSpace: 'nowrap' }}
               >
                 {fmt.label}
               </button>
@@ -682,12 +854,39 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
             flexWrap: 'wrap',
           }}
         >
-          <div className="hide-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto' }}>
+          {/* Mood Filter Strip with Moving Liquid Glass */}
+          <div
+            ref={moodTrackRef}
+            onMouseLeave={() => setHoveredMood(null)}
+            className="liquid-glass-nav-track hide-scrollbar"
+            style={{ overflowX: 'auto', padding: '3px 4px' }}
+          >
+            {/* Sliding Liquid Glass Pill */}
+            <div
+              className="liquid-glass-pill"
+              style={{
+                left: `${moodPillStyle.left}px`,
+                top: `${moodPillStyle.top}px`,
+                width: `${moodPillStyle.width}px`,
+                height: `${moodPillStyle.height}px`,
+                opacity: moodPillStyle.opacity,
+                transition: isMoodPillReady
+                  ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                  : 'none',
+              }}
+            >
+              <div className="liquid-glass-reflection" />
+              <div className="liquid-glass-laser" />
+            </div>
+
             {MOOD_FILTERS.map((mood) => (
               <button
                 key={mood.id}
+                ref={(el) => { moodTabRefs.current[mood.id] = el; }}
                 onClick={() => setActiveMood(mood.id)}
-                className={`filter-chip ${activeMood === mood.id ? 'active' : ''}`}
+                onMouseEnter={() => setHoveredMood(mood.id)}
+                className={`liquid-glass-tab-btn ${activeMood === mood.id ? 'active' : ''}`}
+                style={{ fontSize: '11px', padding: '5px 12px', whiteSpace: 'nowrap' }}
               >
                 {mood.label}
               </button>

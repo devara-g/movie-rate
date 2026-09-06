@@ -66,13 +66,14 @@ export const ListDetailModal: React.FC<ListDetailModalProps> = ({
       }}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         style={{
           width: '100%',
           maxWidth: '820px',
-          maxHeight: '92vh',
+          maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         {/* Header Bar */}
@@ -132,7 +133,7 @@ export const ListDetailModal: React.FC<ListDetailModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="custom-modal-scrollbar" style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* List Meta Header */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#ffffff', margin: 0, lineHeight: 1.3 }}>

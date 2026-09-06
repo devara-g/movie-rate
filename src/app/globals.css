@@ -63,6 +63,8 @@ html {
   font-size: 16px;
   background-color: var(--bg-canvas);
   color: var(--text-med);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
 
 body {
@@ -73,6 +75,37 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+/* Global Sleek Obsidian Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Links & Interactive */
@@ -227,14 +260,18 @@ select {
   align-items: center;
   padding: 4px;
   background: rgba(20, 26, 34, 0.85);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   gap: 4px;
+  position: relative;
 }
 
 .segmented-nav-btn {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -248,19 +285,20 @@ select {
   color: var(--text-muted);
   background: transparent;
   border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
 .segmented-nav-btn:hover {
-  color: var(--text-high);
+  color: #ffffff;
 }
 
 .segmented-nav-btn.active {
-  background: linear-gradient(180deg, #26313f 0%, #1c242e 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 /* Filter Chips */
@@ -338,6 +376,23 @@ select {
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.15s ease-in-out forwards;
 }
@@ -370,15 +425,21 @@ select {
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background-color: rgba(8, 11, 15, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(8, 11, 15, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  overflow-y: auto;
+  padding: 16px;
+  overflow: hidden;
   animation: modalBackdropFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop-cinematic {
+    padding: 10px;
+  }
 }
 
 .modal-surface-cinema {
@@ -515,21 +576,36 @@ select {
   border-color: rgba(255, 255, 255, 0.18);
 }
 
+.custom-modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
 .custom-modal-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 .custom-modal-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: transparent;
 }
 
 .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-  background: #2e3b48;
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
 }
 
 .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #44566a;
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* =========================================
@@ -633,69 +709,123 @@ select {
   box-shadow: 0 4px 14px rgba(245, 197, 24, 0.4);
 }
 
-/* Badge Pill (Age rating, format, score) */
+/* Liquid Glass Badge Pill System (Apple / Vision Pro / A24 Aesthetic) */
 .badge-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: 5px;
+  padding: 4px 10px;
   font-size: 10px;
   font-family: var(--font-display);
-  font-weight: 700;
-  border-radius: 4px;
-  letter-spacing: 0.05em;
+  font-weight: 800;
+  border-radius: 9999px;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  background-color: rgba(20, 26, 34, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--text-high);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.07) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.badge-pill:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.12) 100%);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.3),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
 }
 
 .badge-pill-green {
-  background-color: rgba(0, 224, 84, 0.14);
+  background: linear-gradient(135deg, rgba(0, 224, 84, 0.18) 0%, rgba(0, 224, 84, 0.04) 100%);
   color: #00e054;
-  border-color: rgba(0, 224, 84, 0.35);
-  box-shadow: 0 0 10px rgba(0, 224, 84, 0.15);
+  border-color: rgba(0, 224, 84, 0.4);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(0, 224, 84, 0.5),
+    0 4px 14px rgba(0, 224, 84, 0.2);
 }
 
 .badge-pill-orange {
-  background-color: rgba(255, 128, 0, 0.14);
+  background: linear-gradient(135deg, rgba(255, 128, 0, 0.18) 0%, rgba(255, 128, 0, 0.04) 100%);
   color: #ff8000;
-  border-color: rgba(255, 128, 0, 0.35);
+  border-color: rgba(255, 128, 0, 0.4);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 128, 0, 0.5),
+    0 4px 14px rgba(255, 128, 0, 0.2);
 }
 
 .badge-pill-amber {
-  background-color: rgba(245, 197, 24, 0.08);
-  color: #e5b824;
-  border-color: rgba(245, 197, 24, 0.25);
+  background: linear-gradient(135deg, rgba(245, 197, 24, 0.18) 0%, rgba(245, 197, 24, 0.04) 100%);
+  color: #f5c518;
+  border-color: rgba(245, 197, 24, 0.4);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(245, 197, 24, 0.5),
+    0 4px 14px rgba(245, 197, 24, 0.2);
 }
 
 .badge-pill-blue {
-  background-color: rgba(64, 188, 244, 0.14);
+  background: linear-gradient(135deg, rgba(64, 188, 244, 0.18) 0%, rgba(64, 188, 244, 0.04) 100%);
   color: #40bcf4;
-  border-color: rgba(64, 188, 244, 0.35);
+  border-color: rgba(64, 188, 244, 0.4);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(64, 188, 244, 0.5),
+    0 4px 14px rgba(64, 188, 244, 0.2);
 }
 
-/* Editorial Spotlight Badge (Formal Criterion/A24 Aesthetic) */
+/* Editorial Spotlight Liquid Glass Badge */
 .badge-editorial-spotlight {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 4px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 9999px;
   font-family: var(--font-sans);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e2e8f0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  backdrop-filter: blur(18px) saturate(190%);
+  -webkit-backdrop-filter: blur(18px) saturate(190%);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.badge-editorial-spotlight:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.14) 100%);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.75),
+    0 6px 20px rgba(0, 0, 0, 0.6),
+    0 0 16px rgba(0, 224, 84, 0.25);
+  transform: translateY(-1px);
+}
+
+@keyframes liveRadarPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 224, 84, 0.7), 0 0 6px #00e054;
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(0, 224, 84, 0), 0 0 10px #00e054;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 224, 84, 0), 0 0 6px #00e054;
+  }
 }
 
 .badge-spotlight-dot {
@@ -703,7 +833,7 @@ select {
   height: 6px;
   border-radius: 50%;
   background-color: #00e054;
-  box-shadow: 0 0 8px rgba(0, 224, 84, 0.8);
+  animation: liveRadarPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   display: inline-block;
 }
 
@@ -985,7 +1115,42 @@ select {
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6);
   }
 
+  .mobile-liquid-glass-pill {
+    position: absolute;
+    border-radius: 10px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(0, 224, 84, 0.09) 100%
+    );
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.6),
+      0 0 14px -2px rgba(0, 224, 84, 0.35);
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .mobile-liquid-glass-laser {
+    position: absolute;
+    top: 0;
+    left: 18%;
+    right: 18%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #00e054 30%, #40bcf4 70%, transparent 100%);
+    box-shadow: 0 0 8px #00e054, 0 0 14px rgba(0, 224, 84, 0.8);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
   .mobile-nav-item {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1059,4 +1224,260 @@ select {
     padding: 7px 8px;
     font-size: 11px;
   }
+}
+
+/* =========================================
+   Cinema Opening Curtain Animation (35mm Projector Reveal)
+   ========================================= */
+
+@keyframes projectorBeamSweep {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+  30% {
+    width: 70%;
+    opacity: 0.85;
+  }
+  80% {
+    width: 95%;
+    opacity: 0.3;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes aperturePulseIn {
+  0% {
+    transform: scale(0.6) translateY(6px);
+    opacity: 0;
+    filter: blur(8px);
+  }
+  50% {
+    transform: scale(1.06) translateY(0);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes titleReveal {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.08em;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.26em;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes subtitleReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+}
+
+@keyframes specsReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes introCurtainExitAnim {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(10px);
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.cinema-intro-overlay {
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cinema-intro-exit {
+  animation: introCurtainExitAnim 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.cinema-projector-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(64, 188, 244, 0.4) 20%, rgba(255, 255, 255, 0.95) 50%, rgba(0, 224, 84, 0.4) 80%, transparent 100%);
+  box-shadow: 0 0 20px 2px rgba(255, 255, 255, 0.6);
+  animation: projectorBeamSweep 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.cinema-intro-aperture {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: aperturePulseIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cinema-intro-title {
+  font-size: clamp(28px, 5vw, 42px);
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 255, 255, 0.15);
+  animation: titleReveal 0.9s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cinema-intro-subtitle {
+  font-size: 11px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #8899a6;
+  margin: 0;
+  text-transform: uppercase;
+  animation: subtitleReveal 0.9s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cinema-intro-specs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  color: #a0aec0;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 8px;
+  animation: specsReveal 0.9s 0.45s ease both;
+}
+
+/* =========================================================================
+   LIQUID GLASS SLIDING NAVIGATION (KACA PINDAH-PINDAH)
+   ========================================================================= */
+
+.liquid-glass-nav-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 4px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Moving Liquid Glass Pill */
+.liquid-glass-pill {
+  position: absolute;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(0, 224, 84, 0.08) 100%
+  );
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    0 0 18px -2px rgba(0, 224, 84, 0.3);
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Glass Specular Top Highlight */
+.liquid-glass-reflection {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  right: 3px;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 75%, transparent 100%);
+  border-radius: 6px 6px 12px 12px;
+  pointer-events: none;
+}
+
+/* Glowing Cinema Green Laser Edge at Bottom */
+.liquid-glass-laser {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #00e054 30%, #40bcf4 70%, transparent 100%);
+  box-shadow: 
+    0 0 8px #00e054,
+    0 0 16px rgba(0, 224, 84, 0.8),
+    0 -1px 6px rgba(0, 224, 84, 0.4);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Tab Button inside Liquid Glass Track */
+.liquid-glass-tab-btn {
+  position: relative;
+  z-index: 2;
+  font-size: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  color: #8899a6;
+  text-transform: uppercase;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.liquid-glass-tab-btn:hover {
+  color: #ffffff;
+}
+
+.liquid-glass-tab-btn.active {
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
 }

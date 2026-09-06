@@ -1236,16 +1236,26 @@ export async function sendDirectMessage(params: {
   if (supabase) {
     try {
       // Broadcast over websocket channel for instant live delivery
-      const chatChannel = supabase.channel(`dm_chat_${params.receiver_id}`);
-      chatChannel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          chatChannel.send({
-            type: 'broadcast',
-            event: 'new_message',
-            payload: newMsg,
-          });
-        }
-      });
+      const channelName = `dm_chat_${params.receiver_id}`;
+      const existingChannel = supabase.getChannels().find((c) => c.topic === `realtime:${channelName}`);
+      if (existingChannel && existingChannel.state === 'joined') {
+        existingChannel.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: newMsg,
+        });
+      } else {
+        const chatChannel = supabase.channel(channelName);
+        chatChannel.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            chatChannel.send({
+              type: 'broadcast',
+              event: 'new_message',
+              payload: newMsg,
+            });
+          }
+        });
+      }
 
       // Save in PostgreSQL
       await supabase.from('direct_messages').insert([
@@ -1270,66 +1280,107 @@ export async function sendDirectMessage(params: {
   return { success: true, message: newMsg };
 }
 
+// Global in-memory listener registry to safely multiplex Realtime chat channels
+const chatListenersMap = new Map<string, Set<(message: DirectMessage) => void>>();
+let sharedChatBc: BroadcastChannel | null = null;
+
 /**
  * Real-time WebSocket subscription for incoming direct messages
+ * Multi-plexed safe listener: prevents duplicate subscription errors
  */
 export function subscribeToRealtimeChat(
   currentUserId: string,
   onMessageReceived: (message: DirectMessage) => void
 ): () => void {
+  if (!currentUserId) return () => {};
+
   // 1. Local multi-tab BroadcastChannel fallback
-  let bc: BroadcastChannel | null = null;
   if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-    try {
-      bc = new BroadcastChannel('cinehearth_realtime_chat');
-      bc.onmessage = (event) => {
-        const msg = event.data as DirectMessage;
-        if (msg && (msg.receiver_id === currentUserId || msg.sender_id === currentUserId)) {
-          onMessageReceived(msg);
-        }
-      };
-    } catch {}
+    if (!sharedChatBc) {
+      try {
+        sharedChatBc = new BroadcastChannel('cinehearth_realtime_chat');
+        sharedChatBc.onmessage = (event) => {
+          const msg = event.data as DirectMessage;
+          if (msg) {
+            const listeners = chatListenersMap.get(msg.receiver_id);
+            listeners?.forEach((cb) => cb(msg));
+            if (msg.sender_id !== msg.receiver_id) {
+              const senderListeners = chatListenersMap.get(msg.sender_id);
+              senderListeners?.forEach((cb) => cb(msg));
+            }
+          }
+        };
+      } catch {}
+    }
   }
 
-  // 2. Supabase Realtime WebSocket channel
-  if (!supabase) {
-    return () => {
-      if (bc) bc.close();
-    };
+  // 2. Register callback in user listener set
+  if (!chatListenersMap.has(currentUserId)) {
+    chatListenersMap.set(currentUserId, new Set());
   }
+  const userListeners = chatListenersMap.get(currentUserId)!;
+  userListeners.add(onMessageReceived);
 
-  const channelName = `dm_chat_${currentUserId}`;
-  const channel = supabase.channel(channelName, {
-    config: {
-      broadcast: { self: false },
-    },
-  });
+  // 3. Supabase Realtime WebSocket channel
+  if (supabase) {
+    const channelName = `dm_chat_${currentUserId}`;
+    const existingChannel = supabase.getChannels().find((c) => c.topic === `realtime:${channelName}`);
 
-  channel.on('broadcast', { event: 'new_message' }, (payload) => {
-    const msg = payload.payload as DirectMessage;
-    if (msg && (msg.receiver_id === currentUserId || msg.sender_id === currentUserId)) {
-      onMessageReceived(msg);
+    // Only register .on() and call .subscribe() if channel does NOT exist or is closed
+    if (!existingChannel || existingChannel.state === 'closed') {
+      try {
+        const channel = supabase.channel(channelName, {
+          config: {
+            broadcast: { self: false },
+          },
+        });
+
+        channel
+          .on('broadcast', { event: 'new_message' }, (payload) => {
+            const msg = payload.payload as DirectMessage;
+            if (msg && (msg.receiver_id === currentUserId || msg.sender_id === currentUserId)) {
+              const listeners = chatListenersMap.get(currentUserId);
+              listeners?.forEach((cb) => cb(msg));
+            }
+          })
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'direct_messages',
+              filter: `receiver_id=eq.${currentUserId}`,
+            },
+            (payload) => {
+              const msg = payload.new as DirectMessage;
+              if (msg) {
+                const listeners = chatListenersMap.get(currentUserId);
+                listeners?.forEach((cb) => cb(msg));
+              }
+            }
+          );
+
+        channel.subscribe();
+      } catch (err) {
+        console.warn('Realtime channel subscription notice:', err);
+      }
     }
-  });
-
-  channel.on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'direct_messages',
-      filter: `receiver_id=eq.${currentUserId}`,
-    },
-    (payload) => {
-      onMessageReceived(payload.new as DirectMessage);
-    }
-  );
-
-  channel.subscribe();
+  }
 
   return () => {
-    if (channel) supabase.removeChannel(channel);
-    if (bc) bc.close();
+    const listeners = chatListenersMap.get(currentUserId);
+    if (listeners) {
+      listeners.delete(onMessageReceived);
+      if (listeners.size === 0) {
+        chatListenersMap.delete(currentUserId);
+        if (supabase) {
+          const ch = supabase.getChannels().find((c) => c.topic === `realtime:dm_chat_${currentUserId}`);
+          if (ch) {
+            supabase.removeChannel(ch);
+          }
+        }
+      }
+    }
   };
 }
 

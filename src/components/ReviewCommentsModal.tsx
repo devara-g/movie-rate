@@ -81,13 +81,14 @@ export const ReviewCommentsModal: React.FC<ReviewCommentsModalProps> = ({
       }}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         style={{
           width: '100%',
           maxWidth: '580px',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '92vh',
+          maxHeight: '90vh',
+          overflow: 'hidden',
         }}
       >
         {/* Header Bar */}
@@ -119,11 +120,11 @@ export const ReviewCommentsModal: React.FC<ReviewCommentsModalProps> = ({
               }}
             >
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#00e054' }} />
-              DISKUSI ULASAN FILM
+              DISKUSI RESENSI
             </span>
-            <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#ffffff', marginTop: '4px', margin: 0 }}>
-              Komentar & Pandangan Penonton
-            </h3>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', marginTop: '4px', margin: 0 }}>
+              Komentar & Opini
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -134,7 +135,7 @@ export const ReviewCommentsModal: React.FC<ReviewCommentsModalProps> = ({
           </button>
         </div>
 
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
+        <div className="custom-modal-scrollbar" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
           {/* Highlighted Review Snippet */}
           <div
             style={{

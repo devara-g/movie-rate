@@ -39,6 +39,11 @@ import {
 import { MovieLog, CustomList, AppNotification } from '@/types/database';
 import type { TicketData } from '@/components/TicketStubModal';
 
+const CinemaIntroCurtain = dynamic(
+  () => import('@/components/CinemaIntroCurtain').then((mod) => mod.CinemaIntroCurtain),
+  { ssr: false }
+);
+
 const DirectChatModal = dynamic(
   () => import('@/components/DirectChatModal').then((mod) => mod.DirectChatModal),
   { ssr: false }
@@ -418,7 +423,7 @@ export default function Home() {
   };
 
   const handleOpenLogModal = (filmId?: string) => {
-    setLogModalFilmId(filmId || selectedFilmId);
+    setLogModalFilmId(filmId || undefined);
     setIsLogModalOpen(true);
   };
 
@@ -494,6 +499,9 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#14181c', color: '#ffffff' }}>
+      {/* Cinematic Studio Opening Splash Animation */}
+      <CinemaIntroCurtain />
+
       {/* Fixed Header */}
       <Header
         activeTab={activeTab}

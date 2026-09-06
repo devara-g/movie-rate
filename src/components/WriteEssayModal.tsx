@@ -135,14 +135,15 @@ export const WriteEssayModal: React.FC<WriteEssayModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
           maxWidth: '720px',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '92vh',
+          maxHeight: '90vh',
+          overflow: 'hidden',
         }}
       >
         {/* Header Bar */}
@@ -165,7 +166,7 @@ export const WriteEssayModal: React.FC<WriteEssayModalProps> = ({
                 padding: '3px 8px',
                 borderRadius: '4px',
                 backgroundColor: 'rgba(0, 224, 84, 0.12)',
-                border: '1px solid rgba(0, 224, 84, 0.28)',
+                border: '1px solid rgba(0, 224, 84, 0.3)',
                 color: '#00e054',
                 fontSize: '10px',
                 fontWeight: 800,
@@ -174,9 +175,9 @@ export const WriteEssayModal: React.FC<WriteEssayModalProps> = ({
               }}
             >
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#00e054' }} />
-              EDITORIAL DESK
+              JURNAL KRITIK
             </span>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
               Tulis Esai & Analisis Sinema
             </h2>
           </div>
@@ -190,7 +191,7 @@ export const WriteEssayModal: React.FC<WriteEssayModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <form onSubmit={handleSubmit} className="custom-modal-scrollbar" style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {errorMsg && (
             <div
               style={{

@@ -155,13 +155,14 @@ export const CustomListModal: React.FC<CustomListModalProps> = ({
       }}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         style={{
           width: '100%',
           maxWidth: '660px',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '92vh',
+          maxHeight: '90vh',
+          overflow: 'hidden',
         }}
       >
         {/* Header Bar */}
@@ -183,20 +184,20 @@ export const CustomListModal: React.FC<CustomListModalProps> = ({
                 gap: '5px',
                 padding: '3px 8px',
                 borderRadius: '4px',
-                backgroundColor: 'rgba(0, 224, 84, 0.12)',
-                border: '1px solid rgba(0, 224, 84, 0.28)',
-                color: '#00e054',
+                backgroundColor: 'rgba(245, 197, 24, 0.12)',
+                border: '1px solid rgba(245, 197, 24, 0.3)',
+                color: '#f5c518',
                 fontSize: '10px',
                 fontWeight: 800,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
               }}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#00e054' }} />
-              KURASI KOLEKSI SINEMA
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#f5c518' }} />
+              KURASI SINEMA
             </span>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', marginTop: '4px', margin: 0 }}>
-              Buat Daftar Film Kustom Baru
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+              Buat Daftar Film Baru
             </h2>
           </div>
           <button
@@ -233,7 +234,7 @@ export const CustomListModal: React.FC<CustomListModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
+        <form onSubmit={handleSubmit} className="custom-modal-scrollbar" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
           {/* Title */}
           <div>
             <label className="form-label-cinema">

@@ -102,13 +102,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       }}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         style={{
           width: '100%',
           maxWidth: '580px',
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '80vh',
+          overflow: 'hidden',
         }}
       >
         {/* Search Input Bar */}
@@ -146,12 +147,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             <button
               onClick={() => setQuery('')}
               style={{
-                color: '#8899a6',
-                padding: '4px 8px',
                 fontSize: '11px',
-                fontWeight: 700,
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                color: '#8899a6',
+                padding: '3px 8px',
                 borderRadius: '4px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 cursor: 'pointer',
               }}
@@ -175,7 +175,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         </div>
 
         {/* Results */}
-        <div style={{ maxHeight: '420px', overflowY: 'auto', padding: '10px' }}>
+        <div className="custom-modal-scrollbar" style={{ maxHeight: '420px', overflowY: 'auto', padding: '10px' }}>
           <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#677b8c', padding: '8px 12px', letterSpacing: '0.08em' }}>
             Hasil Pencarian ({filteredFilms.length})
           </div>

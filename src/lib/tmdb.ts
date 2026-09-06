@@ -321,7 +321,7 @@ export async function searchMoviesOnTmdb(query: string): Promise<Film[]> {
     );
     if (!res.ok) throw new Error(`TMDB search error ${res.status}`);
     const data = await res.json();
-    return await enrichMovieItemsWithDetails(data.results.slice(0, 10));
+    return await enrichMovieItemsWithDetails(data.results.slice(0, 10), 3);
   } catch (err) {
     console.warn('TMDB search fallback:', err);
     return FILMS.filter((f) => f.title.toLowerCase().includes(query.toLowerCase()));

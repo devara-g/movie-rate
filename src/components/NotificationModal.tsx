@@ -34,7 +34,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
       }}
     >
       <div
-        className="modal-surface-cinema custom-modal-scrollbar"
+        className="modal-surface-cinema"
         style={{
           position: 'absolute',
           top: '64px',
@@ -44,6 +44,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '480px',
+          overflow: 'hidden',
         }}
       >
         {/* Header */}
@@ -58,21 +59,36 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              NOTIFIKASI AKTIVITAS
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '3px 7px',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(0, 224, 84, 0.12)',
+                border: '1px solid rgba(0, 224, 84, 0.28)',
+                color: '#00e054',
+                fontSize: '10px',
+                fontWeight: 800,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              NOTIFIKASI
             </span>
             {unreadCount > 0 && (
               <span
                 style={{
-                  backgroundColor: '#00e054',
-                  color: '#14181c',
-                  fontSize: '10px',
-                  fontWeight: 900,
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   padding: '1px 6px',
                   borderRadius: '10px',
                 }}
               >
-                {unreadCount} BARU
+                {unreadCount} baru
               </span>
             )}
           </div>
@@ -105,7 +121,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
         </div>
 
         {/* Notifications List */}
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="custom-modal-scrollbar" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           {notifications.length === 0 ? (
             <div style={{ padding: '36px 20px', textAlign: 'center', color: '#8899a6', fontSize: '12px' }}>
               Belum ada notifikasi aktivitas baru.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, getSafeAvatar } from '@/lib/supabase';
 import { AppNotification } from '@/types/database';
 import { NotificationModal } from '@/components/NotificationModal';
@@ -35,6 +35,18 @@ export const Header: React.FC<HeaderProps> = ({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
+  const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const [pillStyle, setPillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isPillReady, setIsPillReady] = useState(false);
+  const navRef = useRef<HTMLElement | null>(null);
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
   const navItems = [
     { id: 'discover', label: 'DISCOVER' },
     { id: 'films', label: 'FILMS' },
@@ -42,6 +54,72 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'journal', label: 'JOURNAL' },
     { id: 'profile', label: 'PROFILE' },
   ];
+
+  const currentPillTarget = hoveredTab || activeTab;
+
+  // Mobile Bottom Bar Liquid Glass Pill
+  const [mobilePillStyle, setMobilePillStyle] = useState<{ left: number; top: number; width: number; height: number; opacity: number }>({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const [isMobilePillReady, setIsMobilePillReady] = useState(false);
+  const mobileBarRef = useRef<HTMLElement | null>(null);
+  const mobileTabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+
+  const activeMobileTabKey = activeTab === 'profile' || activeTab === 'journal' ? 'profile_journal' : activeTab;
+
+  useEffect(() => {
+    const updatePill = () => {
+      const targetBtn = tabRefs.current[currentPillTarget];
+      const navEl = navRef.current;
+      if (targetBtn && navEl) {
+        setPillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsPillReady(true);
+      }
+    };
+
+    updatePill();
+    const timer = setTimeout(updatePill, 40);
+    window.addEventListener('resize', updatePill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updatePill);
+    };
+  }, [currentPillTarget, activeTab]);
+
+  useEffect(() => {
+    const updateMobilePill = () => {
+      const targetBtn = mobileTabRefs.current[activeMobileTabKey];
+      const barEl = mobileBarRef.current;
+      if (targetBtn && barEl) {
+        setMobilePillStyle({
+          left: targetBtn.offsetLeft,
+          top: targetBtn.offsetTop,
+          width: targetBtn.offsetWidth,
+          height: targetBtn.offsetHeight,
+          opacity: 1,
+        });
+        setIsMobilePillReady(true);
+      }
+    };
+
+    updateMobilePill();
+    const timer = setTimeout(updateMobilePill, 50);
+    window.addEventListener('resize', updateMobilePill);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateMobilePill);
+    };
+  }, [activeMobileTabKey]);
 
   return (
     <>
@@ -109,31 +187,39 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </button>
 
-          {/* Text Navigation with Glowing Underline */}
-          <nav className="header-desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
+          {/* Liquid Glass Desktop Navigation Track with Gliding Optical Glass Pill */}
+          <nav
+            ref={navRef}
+            onMouseLeave={() => setHoveredTab(null)}
+            className="header-desktop-nav liquid-glass-nav-track"
+          >
+            {/* Moving Liquid Glass Pill Indicator */}
+            <div
+              className="liquid-glass-pill"
+              style={{
+                left: `${pillStyle.left}px`,
+                top: `${pillStyle.top}px`,
+                width: `${pillStyle.width}px`,
+                height: `${pillStyle.height}px`,
+                opacity: pillStyle.opacity,
+                transition: isPillReady
+                  ? 'left 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+                  : 'none',
+              }}
+            >
+              <div className="liquid-glass-reflection" />
+              <div className="liquid-glass-laser" />
+            </div>
+
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
+                  ref={(el) => { tabRefs.current[item.id] = el; }}
                   onClick={() => setActiveTab(item.id)}
-                  style={{
-                    fontSize: '12px',
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    color: isActive ? '#ffffff' : '#8899a6',
-                    borderTop: 'none',
-                    borderLeft: 'none',
-                    borderRight: 'none',
-                    borderBottom: isActive ? '2px solid #00e054' : '2px solid transparent',
-                    boxShadow: isActive ? '0 4px 12px -2px rgba(0, 224, 84, 0.6)' : 'none',
-                    background: 'transparent',
-                    outline: 'none',
-                    padding: '19px 2px 17px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
+                  onMouseEnter={() => setHoveredTab(item.id)}
+                  className={`liquid-glass-tab-btn ${isActive ? 'active' : ''}`}
                 >
                   {item.label}
                 </button>
@@ -364,10 +450,29 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
 
-    {/* Sleek Mobile Bottom Navigation Bar (< 768px) */}
-    <nav className="mobile-bottom-bar" aria-label="Mobile Navigation">
+    {/* Sleek Mobile Bottom Navigation Bar (< 768px) with Sliding Liquid Glass */}
+    <nav ref={mobileBarRef} className="mobile-bottom-bar" aria-label="Mobile Navigation">
+      {/* Sliding Mobile Liquid Glass Pill */}
+      <div
+        className="mobile-liquid-glass-pill"
+        style={{
+          left: `${mobilePillStyle.left}px`,
+          top: `${mobilePillStyle.top}px`,
+          width: `${mobilePillStyle.width}px`,
+          height: `${mobilePillStyle.height}px`,
+          opacity: mobilePillStyle.opacity,
+          transition: isMobilePillReady
+            ? 'left 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.25), width 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.25), top 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.25), opacity 0.2s ease'
+            : 'none',
+        }}
+      >
+        <div className="liquid-glass-reflection" />
+        <div className="mobile-liquid-glass-laser" />
+      </div>
+
       {/* Discover Tab */}
       <button
+        ref={(el) => { mobileTabRefs.current['discover'] = el; }}
         type="button"
         onClick={() => setActiveTab('discover')}
         className={`mobile-nav-item ${activeTab === 'discover' ? 'active' : ''}`}
@@ -380,6 +485,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Films Catalog Tab */}
       <button
+        ref={(el) => { mobileTabRefs.current['films'] = el; }}
         type="button"
         onClick={() => setActiveTab('films')}
         className={`mobile-nav-item ${activeTab === 'films' ? 'active' : ''}`}
@@ -412,6 +518,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Curated Lists Tab */}
       <button
+        ref={(el) => { mobileTabRefs.current['lists'] = el; }}
         type="button"
         onClick={() => setActiveTab('lists')}
         className={`mobile-nav-item ${activeTab === 'lists' ? 'active' : ''}`}
@@ -429,6 +536,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Profile / Journal Tab */}
       <button
+        ref={(el) => { mobileTabRefs.current['profile_journal'] = el; }}
         type="button"
         onClick={() => setActiveTab(currentUser ? 'profile' : 'journal')}
         className={`mobile-nav-item ${activeTab === 'profile' || activeTab === 'journal' ? 'active' : ''}`}
