@@ -173,9 +173,51 @@ export const TrailerModal: React.FC<TrailerModalProps> = ({
               <p style={{ fontSize: '12px', color: '#677b8c', maxWidth: '300px', textAlign: 'center' }}>
                 Cuplikan resmi untuk film ini belum terdaftar di database TMDB.
               </p>
+              <a
+                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(filmTitle + ' official trailer')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+                style={{ marginTop: '8px', fontSize: '11px' }}
+              >
+                Cari Cuplikan di YouTube ↗
+              </a>
             </div>
           )}
         </div>
+
+        {/* Modal Footer with External Direct Link */}
+        {youtubeKey && (
+          <div
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#14181c',
+              borderTop: '1px solid #242c34',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              color: '#8899a6',
+            }}
+          >
+            <span>Jika video tidak terputar karena ekstensi adblock, tonton langsung di aplikasi:</span>
+            <a
+              href={`https://www.youtube.com/watch?v=${youtubeKey}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                color: '#ff4060',
+                fontWeight: 700,
+                textDecoration: 'none',
+              }}
+            >
+              Buka di YouTube ↗
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -119,9 +119,38 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
   };
 
   const filteredFilms = filmsList.filter((f) => {
-    if (activeMood !== 'all' && !f.moods.includes(activeMood)) return false;
-    if (activeFormat === '35mm' && !f.filmStock.toLowerCase().includes('35mm')) return false;
-    if (activeFormat === 'imax' && !f.distribution.toLowerCase().includes('a24') && f.rating < 4.5) return false;
+    // 1. Curated Mood Filter with Fallbacks
+    if (activeMood !== 'all') {
+      const hasMood = f.moods && Array.isArray(f.moods) && f.moods.includes(activeMood);
+      if (!hasMood) {
+        const g = f.genres || [];
+        const matchesCozy = g.some((x) => ['Animation', 'Comedy', 'Family', 'Music', 'Romance'].includes(x));
+        const matchesMelancholy = g.some((x) => ['Drama', 'Romance', 'Mystery', 'History', 'War'].includes(x));
+        const matchesGoldenHour = g.some((x) => ['Adventure', 'Action', 'Fantasy', 'Sci-Fi', 'Western'].includes(x));
+        const matchesGems = f.rating >= 3.8;
+
+        if (activeMood === 'cozy' && !matchesCozy) return false;
+        if (activeMood === 'melancholy' && !matchesMelancholy) return false;
+        if (activeMood === 'golden-hour' && !matchesGoldenHour) return false;
+        if (activeMood === 'gems' && !matchesGems) return false;
+      }
+    }
+
+    // 2. Format Filter with Fallbacks
+    if (activeFormat === '35mm') {
+      const is35 = f.filmStock?.toLowerCase().includes('35mm') || f.genres?.some((g) => ['Drama', 'Romance', 'History'].includes(g));
+      if (!is35) return false;
+    } else if (activeFormat === 'imax') {
+      const isImax = f.filmStock?.toLowerCase().includes('imax') || f.genres?.some((g) => ['Action', 'Sci-Fi', 'Adventure'].includes(g));
+      if (!isImax) return false;
+    } else if (activeFormat === 'dolby') {
+      const isDolby = f.filmStock?.toLowerCase().includes('dolby') || f.genres?.some((g) => ['Action', 'Thriller', 'Music', 'Sci-Fi'].includes(g));
+      if (!isDolby) return false;
+    } else if (activeFormat === '4k') {
+      const is4k = f.filmStock?.toLowerCase().includes('4k') || f.rating >= 3.9 || f.year < 2024;
+      if (!is4k) return false;
+    }
+
     return true;
   });
 
@@ -163,13 +192,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
           paddingTop: '16px',
         }}
       >
-        <div
-          style={{
-            maxWidth: 'var(--max-width)',
-            margin: '0 auto',
-            padding: '0 20px',
-          }}
-        >
+        <div className="cinema-container">
           {currentHeroFilm ? (
             <div
               className="hero-billboard-stage"
@@ -225,46 +248,25 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
               />
 
               {/* Billboard Content Grid */}
-              <div
-                style={{
-                  position: 'relative',
-                  zIndex: 2,
-                  width: '100%',
-                  padding: '36px 40px',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  gap: '36px',
-                  alignItems: 'center',
-                }}
-              >
+              <div className="hero-billboard-grid">
                 {/* Left: Film Details & Cinematic Narrative */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '640px' }}>
                   {/* Cinema Specs & Live Spotlight Badge */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <span
-                        style={{
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '50%',
-                          backgroundColor: '#f5c518',
-                          boxShadow: '0 0 10px #f5c518',
-                        }}
-                      />
-                      <span className="badge-pill badge-pill-amber">
-                        SPOTLIGHT OF THE WEEK
-                      </span>
+                    <div className="badge-editorial-spotlight">
+                      <span className="badge-spotlight-dot" />
+                      <span>Spotlight of the Week</span>
                     </div>
 
-                    <span className="badge-pill">
-                      {currentHeroFilm.filmStock.includes('35mm') ? '35MM PRINT' : 'DOLBY ATMOS'}
+                    <span className="badge-pill" style={{ fontSize: '10px', color: '#cbd5e1' }}>
+                      {currentHeroFilm.filmStock.includes('35mm') ? '35MM CELLULOID' : currentHeroFilm.filmStock.includes('IMAX') ? 'IMAX 70MM' : 'DOLBY ATMOS'}
                     </span>
 
-                    <span className="badge-pill badge-pill-orange">
+                    <span className="badge-pill" style={{ fontSize: '10px', color: '#94a3b8' }}>
                       13+
                     </span>
 
-                    <span style={{ fontSize: '12px', color: '#9ab0c2', fontWeight: 600 }}>
+                    <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 500, letterSpacing: '0.01em' }}>
                       {currentHeroFilm.runtime} mins • {currentHeroFilm.genres.join(', ')}
                     </span>
                   </div>
@@ -613,11 +615,8 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
           2. CINEMA CURATION NAVIGATOR & CATEGORY BAR
          ========================================================================= */}
       <section
+        className="cinema-container"
         style={{
-          maxWidth: 'var(--max-width)',
-          margin: '0 auto',
-          padding: '0 20px',
-          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
@@ -715,22 +714,9 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
       {/* =========================================================================
           3. CINEMA FILM CARDS GRID
          ========================================================================= */}
-      <section
-        style={{
-          maxWidth: 'var(--max-width)',
-          margin: '0 auto',
-          padding: '0 20px',
-          width: '100%',
-        }}
-      >
+      <section className="cinema-container">
         {filteredFilms.length === 0 && isLoading ? (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))',
-              gap: '22px',
-            }}
-          >
+          <div className="cinema-film-grid">
             {Array.from({ length: 10 }).map((_, idx) => (
               <div
                 key={idx}
@@ -750,13 +736,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
             ))}
           </div>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))',
-              gap: '22px',
-            }}
-          >
+          <div className="cinema-film-grid">
             {filteredFilms.map((film) => (
               <div
                 key={film.id}
@@ -1023,7 +1003,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
         </div>
 
         {reviews.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '16px' }}>
+          <div className="reviews-two-col-grid">
             {reviews.map((rev, idx) => (
               <div
                 key={`${rev.id}-${idx}`}

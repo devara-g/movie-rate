@@ -254,13 +254,7 @@ export const FilmsCatalogView: React.FC<FilmsCatalogViewProps> = ({
 
       {/* 1. TIX ID Card Holders Grid */}
       {viewMode === 'grid' && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
-            gap: '20px',
-          }}
-        >
+        <div className="cinema-film-grid catalog-film-grid">
           {filteredFilms.map((film) => (
             <div
               key={film.id}

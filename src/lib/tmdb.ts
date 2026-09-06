@@ -87,7 +87,17 @@ export function mapTmdbMovieToFilm(item: TmdbMovieItem): Film {
   // Realistic cinema specs based on genre
   const isWidescreen = genres.includes('Action') || genres.includes('Sci-Fi') || genres.includes('Adventure');
   const aspectRatio = isWidescreen ? '2.39:1 Panavision' : '1.85:1 Flat';
-  const filmStock = isWidescreen ? 'IMAX 70mm / Arri 65' : (genres.includes('Romance') ? '35mm Kodak Vision3' : 'DCI 4K Digital Master');
+  
+  let filmStock = 'DCI 4K Digital Master';
+  if (genres.includes('Action') || genres.includes('Sci-Fi') || genres.includes('Adventure')) {
+    filmStock = 'IMAX 70mm / Arri 65';
+  } else if (genres.includes('Drama') || genres.includes('Romance') || genres.includes('History')) {
+    filmStock = '35mm Kodak Vision3';
+  } else if (genres.includes('Thriller') || genres.includes('Crime') || genres.includes('Music')) {
+    filmStock = 'Dolby Atmos Cinema DCP';
+  } else if (item.vote_average >= 7.8 || year < 2023) {
+    filmStock = '4K Restored Master';
+  }
 
   // Generate smooth 10-bin distribution based on vote_average
   const roundedRating = parseFloat((item.vote_average / 2).toFixed(1)); // Convert 10-scale to 5-scale
@@ -97,6 +107,24 @@ export function mapTmdbMovieToFilm(item: TmdbMovieItem): Film {
     const diff = Math.abs(roundedRating - starVal);
     return Math.max(50, Math.floor(baseCount * Math.exp(-diff * 1.5)));
   });
+
+  // Dynamically assign authentic cinema moods based on genres, themes, and rating
+  const moods: string[] = ['all'];
+  if (genres.some((g) => ['Animation', 'Comedy', 'Family', 'Music'].includes(g))) {
+    moods.push('cozy');
+  }
+  if (genres.some((g) => ['Drama', 'Romance', 'Mystery', 'History', 'War'].includes(g))) {
+    moods.push('melancholy');
+  }
+  if (genres.some((g) => ['Adventure', 'Action', 'Fantasy', 'Sci-Fi', 'Western'].includes(g))) {
+    moods.push('golden-hour');
+  }
+  if (roundedRating >= 3.8 || item.vote_average >= 7.2 || (item.vote_count < 8000 && roundedRating >= 3.5)) {
+    moods.push('gems');
+  }
+  if (moods.length <= 1) {
+    moods.push('cozy');
+  }
 
   return {
     id: `tmdb-${item.id}`,
@@ -116,7 +144,7 @@ export function mapTmdbMovieToFilm(item: TmdbMovieItem): Film {
     synopsis: item.overview || 'Sinopsis belum tersedia.',
     posterUrl,
     backdropUrl,
-    moods: ['trending', 'cozy'],
+    moods,
     certifiedMasterwork: (item.vote_average >= 8.0),
     scoreDistribution,
     logsCount: Math.max(500, Math.floor((item.vote_count || 500) * 0.4)),

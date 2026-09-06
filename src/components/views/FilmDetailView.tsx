@@ -144,7 +144,7 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({
         }}
       >
         <div
-          className="tactile-card"
+          className="tactile-card film-detail-layout"
           style={{
             padding: '28px',
             backgroundColor: '#1b2228',
